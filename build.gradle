@@ -19,6 +19,7 @@ plugins {
 
 group 'bot.boob'
 version '1.0.0'
+mainClassName = "bot.boobbot.BoobBot"
 
 sourceCompatibility = 1.8
 
