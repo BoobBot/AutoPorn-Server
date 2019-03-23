@@ -5,29 +5,15 @@ import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.CompletableFuture
 
-public class BbApi(apiKey: String) {
-    val headers = createHeaders(
-        Pair("Key", apiKey)
-    )
-
-    val client = OkHttpClient()
-
-    fun createHeaders(vararg kv: Pair<String, String>): Headers {
-        val builder = Headers.Builder()
-
-        for (header in kv) {
-            builder.add(header.first, header.second)
-        }
-
-        return builder.build()
-    }
+public class BbApi(private val apiKey: String) {
+    private val client = OkHttpClient()
 
     fun get(category: String): CompletableFuture<String> {
         val future = CompletableFuture<String>()
 
         val req = Request.Builder()
             .url("https://boob.bot/api/v2/img/$category")
-            .headers(headers)
+            .header("Key", apiKey)
             .get()
             .build()
 

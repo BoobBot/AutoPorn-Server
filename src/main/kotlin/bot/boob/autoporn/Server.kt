@@ -43,9 +43,12 @@ class Server {
             val hooks = database.getAllWebhooks()
 
             for (hook in hooks) {
-                api.get(hook.getString("category")).thenAccept {
-                    webhookClient.post(hook.getString("webhook"), it)
-                    // TODO check if unknown webhook, delete if so
+                val guildId = hook.getString("_id")
+                val webhookUrl = hook.getString("webhook")
+                val category = hook.getString("category")
+
+                api.get(category).thenAccept {
+                    webhookClient.post(webhookUrl, it, guildId)
                 }
             }
         }
