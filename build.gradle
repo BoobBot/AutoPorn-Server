@@ -19,6 +19,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:1.2.1"
     implementation "org.mongodb:mongodb-driver-sync:3.10.1"
     implementation "io.sentry:sentry-logback:1.7.9"
+    implementation "org.json:json:20180813"
 }
 
 compileKotlin {

@@ -1,9 +1,7 @@
 package bot.boob.autoporn
 
-import com.mongodb.BasicDBObject
 import com.mongodb.client.MongoClients
 import com.mongodb.client.model.Filters.eq
-import com.mongodb.client.model.UpdateOptions
 import org.bson.Document
 
 class Database {
@@ -14,17 +12,12 @@ class Database {
     private val webhooks = autoPorn.getCollection("webhooks")
 
 
-    fun getWebhook(guildId: String): String? {
-        return webhooks.find(BasicDBObject("_id", guildId))
-                .first()?.getString("webhook")
-    }
+    fun getAllWebhooks(): List<Document> {
+        return webhooks.find().toList()
 
-    fun setWebhook(guildId: String, webhookUrl: String) {
-        webhooks.updateOne(
-                eq("_id", guildId),
-                Document("\$set", Document("webhook", webhookUrl)),
-                UpdateOptions().upsert(true)
-        )
+        // Keys:
+        // _id     -> guild id
+        // webhook -> webhook url
     }
 
     fun deleteWebhook(guildId: String) {
