@@ -48,7 +48,6 @@ class WebhookClient {
                     }
 
                     val json = JSONObject(body.string())
-                    println(json.toString())
 
                     when (json.getInt("code")) {
                         10015 -> Server.database.deleteWebhook(guildId)
