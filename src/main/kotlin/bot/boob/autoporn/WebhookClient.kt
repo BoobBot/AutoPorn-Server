@@ -22,6 +22,8 @@ class WebhookClient {
         embeds.put(embed)
 
         val payload = JSONObject()
+        payload.put("username", "BoobBot AutoPorn")
+        payload.put("avatar_url", "https://boob.bot/static/assets/images/avatar.png")
         payload.put("embeds", embeds)
 
         val req = Request.Builder()
