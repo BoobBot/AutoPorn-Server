@@ -15,7 +15,7 @@ class WebhookClient {
         imgObj.put("url", img)
 
         val embed = JSONObject()
-        embed.put("color", 16711680) // red
+        embed.put("color", 10451438) // not red
         embed.put("image", imgObj)
 
         val embeds = JSONArray()

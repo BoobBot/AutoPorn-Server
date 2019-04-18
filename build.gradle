@@ -19,7 +19,7 @@ plugins {
 }
 
 group 'bot.boob'
-version '1.0.0'
+version '1.0.1'
 mainClassName = "bot.boob.autoporn.Server"
 
 sourceCompatibility = 1.8
