@@ -15,13 +15,15 @@ class WebhookClient {
         imgObj.put("url", img)
 
         val embed = JSONObject()
-        embed.put("color", 16711680) // red
+        embed.put("color", 10451438) // not red
         embed.put("image", imgObj)
 
         val embeds = JSONArray()
         embeds.put(embed)
 
         val payload = JSONObject()
+        payload.put("username", "BoobBot AutoPorn")
+        payload.put("avatar_url", "https://boob.bot/static/assets/images/avatar.png")
         payload.put("embeds", embeds)
 
         val req = Request.Builder()
