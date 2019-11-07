@@ -5,7 +5,7 @@ import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.CompletableFuture
 
-public class BbApi(private val apiKey: String) {
+class BbApi(private val apiKey: String) {
     private val client = OkHttpClient()
 
     fun get(category: String): CompletableFuture<String> {

@@ -4,9 +4,9 @@ import com.mongodb.client.MongoClients
 import com.mongodb.client.model.Filters.eq
 import org.bson.Document
 
-class Database {
+class Database(mongoDbUrl: String) {
 
-    private val mongo = MongoClients.create()
+    private val mongo = MongoClients.create(mongoDbUrl)
 
     private val autoPorn = mongo.getDatabase("autoporn")
     private val webhooks = autoPorn.getCollection("webhooks")

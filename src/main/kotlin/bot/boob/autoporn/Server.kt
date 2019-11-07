@@ -12,13 +12,13 @@ import java.util.concurrent.TimeUnit
 class Server {
 
     companion object {
-        public val logger = LoggerFactory.getLogger(Server::class.java) as Logger
-        public val database = Database()
+        val logger = LoggerFactory.getLogger(Server::class.java) as Logger
 
-        public val webhookClient = WebhookClient()
-        public lateinit var api: BbApi
+        lateinit var database: Database
+        lateinit var api: BbApi
 
-        public val executor = Executors.newSingleThreadScheduledExecutor()!!
+        val webhookClient = WebhookClient()
+        val executor = Executors.newSingleThreadScheduledExecutor()!!
 
         @Throws(Exception::class)
         @JvmStatic
@@ -34,6 +34,7 @@ class Server {
             }
 
             api = BbApi(config.getProperty("bb_key"))
+            database = Database(config.getProperty("mongo_db_url"))
 
             val postInterval = config.getProperty("interval", "5").toLong()
             executor.scheduleAtFixedRate({ post() }, 0L, postInterval, TimeUnit.MINUTES)
