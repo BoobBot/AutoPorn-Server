@@ -44,7 +44,12 @@ class Server {
         fun post() {
             runCatching { database.migrateV1Webhooks() }.onFailure { Sentry.capture(it) }
 
-            val hooks = database.getAllWebhooks()
+            val hooks = database.runCatching { getAllWebhooks() }
+                .onFailure {
+                    Sentry.capture(it)
+                    it.printStackTrace()
+                }.getOrNull()
+                ?: return
 
             for (hook in hooks) {
                 val guildId = hook.getString("_id")
