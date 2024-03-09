@@ -46,6 +46,7 @@ class Server {
 
             try {
                 val hooks = database.getAllWebhooks()
+                println("Posting to ${hooks.size} webhooks...")
 
                 for (config in hooks) {
                     api.get(config.category).thenAccept {
