@@ -40,8 +40,14 @@ class Database(mongoDbUrl: String) {
         }
     }
 
-    fun getAllWebhooks(): List<Document> {
-        return webhooksv2.find().flatMap { it.getList("webhooks", Document::class.java) }
+    fun getAllWebhooks(): List<WebhookConfiguration> {
+        return webhooksv2.find().flatMap {
+            val guildId = it.getString("_id")
+
+            it.getList("webhooks", Document::class.java).map { cfg ->
+                WebhookConfiguration(guildId, cfg.getString("category"), cfg.getString("channelId"), cfg.getString("webhook"))
+            }
+        }
 
         // Keys:
         // _id     -> guild id

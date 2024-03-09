@@ -44,22 +44,19 @@ class Server {
         fun post() {
             runCatching { database.migrateV1Webhooks() }.onFailure { Sentry.capture(it) }
 
-            val hooks = database.runCatching { getAllWebhooks() }
-                .onFailure {
-                    Sentry.capture(it)
-                    it.printStackTrace()
-                }.getOrNull()
-                ?: return
+            try {
+                val hooks = database.getAllWebhooks()
 
-            for (hook in hooks) {
-                val guildId = hook.getString("_id")
-                val channelId = hook.getString("channelId")
-                val webhookUrl = hook.getString("webhook")
-                val category = hook.getString("category")
-
-                api.get(category).thenAccept {
-                    webhookClient.post(webhookUrl, category, it, guildId, channelId)
+                for (config in hooks) {
+                    api.get(config.category).thenAccept {
+                        webhookClient.post(config.webhook, config.category, it, config.guildId, config.channelId)
+                    }.exceptionally {
+                        it.printStackTrace()
+                        return@exceptionally null
+                    }
                 }
+            } catch (t: Throwable) {
+                t.printStackTrace()
             }
         }
     }
