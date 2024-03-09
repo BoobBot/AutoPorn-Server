@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import java.io.FileReader
 import java.util.*
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 class Server {
@@ -18,7 +19,7 @@ class Server {
         lateinit var api: BbApi
 
         val webhookClient = WebhookClient()
-        val executor = Executors.newSingleThreadScheduledExecutor()!!
+        val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
 
         @Throws(Exception::class)
         @JvmStatic
@@ -37,19 +38,22 @@ class Server {
             database = Database(config.getProperty("mongo_db_url"))
 
             val postInterval = config.getProperty("interval", "5").toLong()
-            executor.scheduleAtFixedRate({ post() }, 0L, postInterval, TimeUnit.MINUTES)
+            executor.scheduleAtFixedRate(::post, 0L, postInterval, TimeUnit.MINUTES)
         }
 
         fun post() {
+            runCatching { database.migrateV1Webhooks() }.onFailure { Sentry.capture(it) }
+
             val hooks = database.getAllWebhooks()
 
             for (hook in hooks) {
                 val guildId = hook.getString("_id")
+                val channelId = hook.getString("channelId")
                 val webhookUrl = hook.getString("webhook")
                 val category = hook.getString("category")
 
                 api.get(category).thenAccept {
-                    webhookClient.post(webhookUrl, it, guildId)
+                    webhookClient.post(webhookUrl, category, it, guildId, channelId)
                 }
             }
         }

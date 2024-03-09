@@ -10,7 +10,7 @@ class WebhookClient {
     private val applicationJson = MediaType.parse("application/json")
     private val client = OkHttpClient()
 
-    fun post(url: String, img: String, guildId: String) {
+    fun post(url: String, category: String, img: String, guildId: String, channelId: String) {
         val imgObj = JSONObject()
         imgObj.put("url", img)
 
@@ -52,7 +52,7 @@ class WebhookClient {
                     val json = JSONObject(body.string())
 
                     when (json.getInt("code")) {
-                        10015 -> Server.database.deleteWebhook(guildId)
+                        10015 -> Server.database.deleteWebhook(guildId, channelId, category)
                     }
                 }
             }
