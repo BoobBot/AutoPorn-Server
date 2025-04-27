@@ -10,7 +10,7 @@ import java.net.http.HttpResponse.BodyHandlers
 class WebhookClient {
     private val client = HttpClient.newHttpClient()
 
-    fun post(url: String, category: String, img: String, guildId: String, channelId: String) {
+    fun post(url: String, category: String, img: String, guildId: Long, channelId: Long) {
         val imgObj = JSONObject().put("url", img)
 
         val embed = JSONObject()

@@ -32,7 +32,7 @@ class Database(host: String, port: String, name: String, user: String, auth: Str
             .map { WebhookConfiguration(it["guildId"], it["channelId"], it["category"], it["webhook"]) }
     }
 
-    fun deleteWebhook(guildId: String, channelId: String, category: String) {
+    fun deleteWebhook(guildId: Long, channelId: Long, category: String) {
         execute("DELETE FROM webhooks WHERE guildId = ? AND channelId = ? AND category = ?", guildId, channelId, category)
     }
 

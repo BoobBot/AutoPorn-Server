@@ -1,8 +1,8 @@
 package bot.boob.autoporn
 
 class WebhookConfiguration(
-    val guildId: String,
-    val channelId: String,
+    val guildId: Long,
+    val channelId: Long,
     val category: String,
     val webhook: String
 )
