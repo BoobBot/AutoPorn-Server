@@ -1,43 +1,22 @@
 package bot.boob.autoporn
 
-import okhttp3.*
 import org.json.JSONObject
-import java.io.IOException
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.util.concurrent.CompletableFuture
 
 class BbApi(private val apiKey: String) {
-    private val client = OkHttpClient()
+    private val client = HttpClient.newHttpClient()
 
     fun get(category: String): CompletableFuture<String> {
-        val future = CompletableFuture<String>()
-
-        val req = Request.Builder()
-            .url("https://boob.bot/api/v2/img/$category")
+        val req = HttpRequest.newBuilder(URI("https://boob.bot/api/v2/img/$category"))
+            .GET()
             .header("Key", apiKey)
-            .get()
             .build()
 
-        client.newCall(req).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                future.completeExceptionally(e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    val body = response.body()
-
-                    if (body != null) {
-                        val json = JSONObject(body.string())
-                        future.complete(json.getString("url"))
-                        return
-                    }
-                }
-
-                future.completeExceptionally(Exception(response.message()))
-            }
-        })
-
-        return future
+        return client.sendAsync(req, HttpResponse.BodyHandlers.ofString())
+            .thenApply { JSONObject(it.body()).getString("url") }
     }
-
 }

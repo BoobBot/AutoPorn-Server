@@ -1,62 +1,60 @@
 package bot.boob.autoporn
 
-import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse.BodyHandlers
 
 class WebhookClient {
-
-    private val applicationJson = MediaType.parse("application/json")
-    private val client = OkHttpClient()
+    private val client = HttpClient.newHttpClient()
 
     fun post(url: String, category: String, img: String, guildId: String, channelId: String) {
-        val imgObj = JSONObject()
-        imgObj.put("url", img)
+        val imgObj = JSONObject().put("url", img)
 
         val embed = JSONObject()
-        embed.put("color", 10451438) // not red
-        embed.put("image", imgObj)
+            .put("color", 10451438) // not red
+            .put("image", imgObj)
 
-        val embeds = JSONArray()
-        embeds.put(embed)
+        val embeds = JSONArray().put(embed)
 
         val payload = JSONObject()
-        payload.put("username", "BoobBot AutoPorn")
-        payload.put("avatar_url", "https://boob.bot/static/assets/images/avatar.png")
-        payload.put("embeds", embeds)
+            .put("username", "BoobBot AutoPorn")
+            .put("avatar_url", "https://boob.bot/static/assets/images/avatar.png")
+            .put("embeds", embeds)
 
-        val req = Request.Builder()
-            .url(url)
-            .post(RequestBody.create(applicationJson, payload.toString()))
+        val req = HttpRequest.newBuilder(URI(url))
+            .POST(HttpRequest.BodyPublishers.ofString(payload.toString(), Charsets.UTF_8))
+            .header("content-type", "application/json; charset=utf-8")
             .build()
 
-        client.newCall(req).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Server.logger.error("Error while making Webhook Request", e)
-            }
+        client.sendAsync(req, BodyHandlers.ofString())
+            .thenAccept {
+                val code = it.statusCode()
+                val body = it.body()
 
-            override fun onResponse(call: Call, response: Response) {
-                if (!response.isSuccessful) {
-                    val body = response.body()
+                if (code < 200 || code >= 300) {
+                    val json = JSONObject(body)
+                    var handled = true
 
-                    if (body == null) {
-                        Server.logger.warn(
-                            "Invalid status code while posting: {} - {}",
-                            response.code(),
-                            response.message()
-                        )
-                        return
+                    if (!json.isNull("code")) {
+                        when (json.getInt("code")) {
+                            UNKNOWN_WEBHOOK -> Server.database.deleteWebhook(guildId, channelId, category)
+                            else -> handled = false
+                        }
+                    } else {
+                        handled = false
                     }
 
-                    val json = JSONObject(body.string())
-
-                    when (json.getInt("code")) {
-                        10015 -> Server.database.deleteWebhook(guildId, channelId, category)
+                    if (!handled) {
+                        Server.logger.warn("Invalid status code while posting to $url: $code - $body")
                     }
                 }
             }
-        })
     }
 
+    companion object {
+        private const val UNKNOWN_WEBHOOK = 10015
+    }
 }

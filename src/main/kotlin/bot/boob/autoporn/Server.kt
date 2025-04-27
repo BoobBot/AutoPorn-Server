@@ -35,15 +35,19 @@ class Server {
             }
 
             api = BbApi(config.getProperty("bb_key"))
-            database = Database(config.getProperty("mongo_db_url"))
+            database = Database(
+                config.getProperty("db_host", "127.0.0.1"),
+                config.getProperty("db_port", "3306"),
+                config.getProperty("db_name"),
+                config.getProperty("db_user"),
+                config.getProperty("db_auth")
+            )
 
             val postInterval = config.getProperty("interval", "5").toLong()
             executor.scheduleAtFixedRate(::post, 0L, postInterval, TimeUnit.MINUTES)
         }
 
         fun post() {
-            runCatching { database.migrateV1Webhooks() }.onFailure { Sentry.capture(it) }
-
             try {
                 val hooks = database.getAllWebhooks()
                 println("Posting to ${hooks.size} webhooks...")
